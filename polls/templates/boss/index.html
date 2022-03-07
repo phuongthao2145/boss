@@ -1,0 +1,25 @@
+{% extends "boss/base.html" %}
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<table border="1" >
+    <thead>
+        <tr>
+            <th>MSSV</th>
+            <th>Name</th>
+            <th>File</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in info %}  
+        <tr>
+            <td>{{ row.mssv }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.attachment }}</td>
+            <td>{{ row.email }}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{% endblock %}

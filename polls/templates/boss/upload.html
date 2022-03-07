@@ -1,0 +1,17 @@
+{% extends "boss/base.html" %}
+{% block title %}Upload File{% endblock %}
+
+{% block form %}
+<div class="col-md-5 col-12">
+    <h2>Choose an excel file (*.xls,*.xlsx) to import</h2>
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+            <div class="input-group mb-3">
+            {{ form.as_table }}
+                <button type="submit" class="input-group-text" for="inputGroupFile02">Upload</button>
+            </div>
+    </form>
+</div>
+
+
+{% endblock %}

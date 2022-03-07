@@ -1,0 +1,10 @@
+{% extends "boss/base.html" %}
+{% block title %}Index{% endblock %}
+
+{% block content %}
+{% for row in mssv %}     
+ {{ row }}
+
+<br>
+{%endfor%}
+{% endblock %}
