@@ -125,5 +125,5 @@ STATICFILES_DIRS = [
 EMAIL_HOST: 'smtp.google.com'
 EMAIL_PORT: 587
 EMAIL_HOST_USER: 'phuongthao2145@gmail.com'
-EMAIL_HOST_PASSWORD: 'onlyyou123456789'
+EMAIL_HOST_PASSWORD: 'ubycxitzbdvraxuw'
 EMAIL_USE_TLS: True
