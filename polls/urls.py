@@ -12,4 +12,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('uploadfile', views.upload_file, name='uploadfile'),
     re_path(r'^readfile/(?P<filename>.+)$', views.readfile, name='readfile'),
+    path('sendmail/<mssv>',views.sendmail,name='sendmail'),
+    path('createpdf',views.createpdf,name='createpdf'),
 ]
