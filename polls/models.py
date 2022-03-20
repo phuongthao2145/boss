@@ -18,3 +18,4 @@ class Info(models.Model):
     toDate =  models.CharField(max_length=200,null=True)
     attachment = models.CharField(max_length=200,null=True)
     status = models.IntegerField(default=0)
+    wpdf = models.IntegerField(default=0)

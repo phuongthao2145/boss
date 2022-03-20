@@ -37,100 +37,96 @@ currentMonth = datetime.now().month
 currentYear = datetime.now().year
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
-def createpdf(identity,outputFile):
-    #info student
-    info = Info.objects.filter(Identity=identity).first()
-    packet = io.BytesIO()
-    can = canvas.Canvas(packet, pagesize=letter)
-    can.setFont("TNR-B", 12)
-    name = "%s" % info.fname + " " +"%s" % info.lname
-    can.drawString(110, 639, name)
-    #set address
-    addr = info.address
-    #https://www.tutorialspoint.com/python-text-wrapping-and-filling
-    #20 is line width
-    wraped_text = u"\n".join(textwrap.wrap(addr,40))
-    t_message = can.beginText()
-    t_message.setTextOrigin(100,620)
-    t_message.textLines(wraped_text)
-    can.drawText(t_message)
-    #set date of birth
-    dateOfBirth =info.DateOfBirth
-    can.drawString(411, 639, dateOfBirth)
-    #set gender
-    gender = "Nữ" if(info.gender == 1) else "Nam"
-    can.drawString(383, 620, gender)
-    #set p_object
-    p_object = '2'
-    can.drawString(453, 601, p_object)
-    #set p_area
-    p_area = '2'
-    can.drawString(442, 581, p_area)
-    #set major
-    major = info.major
-    can.drawCentredString(300, 466, major)
-    #set from
-    from_d = info.fromDate
-    can.drawString(215, 426, from_d)
-    #set to
-    to_d = info.toDate
-    can.drawString(346, 426, to_d)
-    #set day
-    can.drawString(423, 221, str(currentDay))
-    #set month
-    can.drawString(472, 221, str(currentMonth))
-    #set carpentry
-    carpentry = "Ký tên"
-    can.drawString(400, 150, carpentry)
-    #save
-    can.showPage()
-    can.save()
-    print(can.drawText(t_message))
-    #move to the beginning of the StringIO buffer
-    packet.seek(0)
-    # create a new PDF with Reportlab
-    new_pdf = PdfFileReader(packet)
-    # read your existing PDF
-    existing_pdf = PdfFileReader(open("uploads/GBNH.pdf", "rb"))
-    output = PdfFileWriter()
-    # add the "watermark" (which is the new pdf) on the existing page
-    page = existing_pdf.getPage(0)
-    page.mergePage(new_pdf.getPage(0))
-    output.addPage(page)
-    #output.addPage(new_pdf.getPage(0))
-    # finally, write "output" to a real file
-    outputStream = open(outputFile , "wb")
-    try:
-        output.write(outputStream)
-        outputStream.close()
-    except:
-        return HttpResponse('write file fail!!!')
-    return HttpResponse('write file succsessfully!!!')
-
-def sendmail(request,identity):
-    if(identity == 'all'):
-        info = Info.objects.values_list('email', flat=True).distinct().exclude(status=1)
-        to = list(info)
-        update_status = Info.objects.filter(email = info)
-    else:
+def createpdf():
+    infos = Info.objects.exclude(status=1).order_by('id')[:10]
+    for info in infos:
+        #info student
+        packet = io.BytesIO()
+        can = canvas.Canvas(packet, pagesize=letter)
+        can.setFont("TNR-B", 12)
+        name = "%s" % info.fname + " " +"%s" % info.lname
+        can.drawString(110, 639, name)
+        #set address
+        addr = info.address
+        #https://www.tutorialspoint.com/python-text-wrapping-and-filling
+        #20 is line width
+        wraped_text = u"\n".join(textwrap.wrap(addr,40))
+        t_message = can.beginText()
+        t_message.setTextOrigin(100,620)
+        t_message.textLines(wraped_text)
+        can.drawText(t_message)
+        #set date of birth
+        dateOfBirth =info.DateOfBirth
+        can.drawString(411, 639, dateOfBirth)
+        #set gender
+        gender = "Nữ" if(info.gender == 1) else "Nam"
+        can.drawString(383, 620, gender)
+        #set p_object
+        p_object = '2'
+        can.drawString(453, 601, p_object)
+        #set p_area
+        p_area = '2'
+        can.drawString(442, 581, p_area)
+        #set major
+        major = info.major
+        can.drawCentredString(300, 466, major)
+        #set from
+        from_d = info.fromDate
+        can.drawString(215, 426, from_d)
+        #set to
+        to_d = info.toDate
+        can.drawString(346, 426, to_d)
+        #set day
+        can.drawString(423, 221, str(currentDay))
+        #set month
+        can.drawString(472, 221, str(currentMonth))
+        #set carpentry
+        carpentry = "Ký tên"
+        can.drawString(400, 150, carpentry)
+        #save
+        can.showPage()
+        can.save()
+        print(can.drawText(t_message))
+        #move to the beginning of the StringIO buffer
+        packet.seek(0)
+        # create a new PDF with Reportlab
+        new_pdf = PdfFileReader(packet)
+        # read your existing PDF
+        existing_pdf = PdfFileReader(open("uploads/GBNH.pdf", "rb"))
+        output = PdfFileWriter()
+        # add the "watermark" (which is the new pdf) on the existing page
+        page = existing_pdf.getPage(0)
+        page.mergePage(new_pdf.getPage(0))
+        output.addPage(page)
+        #output.addPage(new_pdf.getPage(0))
+        # finally, write "output" to a real file
+        outputFile = "uploads/"+ info.attachment
+        outputStream = open(outputFile , "wb")
         try:
-            info = Info.objects.filter(Identity=identity).exclude(status=1).first().email
+            output.write(outputStream)
+            outputStream.close()
+            Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
         except:
-            return HttpResponse('This email already sent!')
-        to = [info]
-        update_status = Info.objects.filter(email = info)
-    subject = "Giay bao nhap hoc"
-    body = "giay bao nhap hoc"
-    from_email = None
-    msg = EmailMessage(subject, body, from_email, to)
-    msg.attach_file('uploads/output.pdf')
-    try:
-        msg.send()
-        update_status.update(status=1)
-    except:
-        return HttpResponse('Sent mail fail')
-    return HttpResponse('Sent mail Successfully')
+            HttpResponse('create PDF error')
 
+def sendmail():
+    info = Info.objects.filter(wpdf=1,status=0).order_by('id')[:2]
+    for to in info:
+        email = to.email
+        subject = "Giấy Báo Nhập Học"
+        body = "Giấy báo nhập học"
+        from_email = None
+        msg = EmailMessage(subject, body, from_email, [email])
+        msg.attach_file('uploads/' + to.attachment)
+        #createpdf
+        outputFile = "uploads/"+ to.attachment
+        try:
+            #send mail
+            msg.send()
+            Info.objects.filter(Identity=to.Identity).update(status = 1)
+            to.refresh_from_db()
+        except:
+            HttpResponse('send mail error')
 
 def index(request):
     info = Info.objects.all()
@@ -151,9 +147,7 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
 
-
 def readfile(request, filename):
-
     file_extension = os.path.splitext(filename)
     if file_extension[1] == '.xlsx':
         xlsx_file = Path('uploads', filename)
@@ -172,8 +166,15 @@ def readfile(request, filename):
         saveDB(sheet)
     except ex:
         return HttpResponse('save db unsuccess' + ex)
-    #createpdf('052204008562','uploads/052204008562.pdf')
     return HttpResponseRedirect(reverse('boss:index'))
+
+#https://stackoverflow.com/questions/31359150/convert-date-from-excel-in-number-format-to-date-format-python
+def checkDate(myDate):
+    if(isinstance(myDate,float)):
+        myDate = datetime(*xlrd.xldate_as_tuple(myDate, 0)).strftime('%d/%m/%Y')
+    elif(isinstance(myDate,str)):
+        myDate = datetime.strptime(myDate, "%d/%m/%Y").strftime("%d/%m/%Y")
+    return myDate
 
 def saveDB(sheet):
     count = 0
@@ -186,16 +187,15 @@ def saveDB(sheet):
             fname = col[2].value,
             lname = col[3].value,
             gender = col[4].value,
-            DateOfBirth = datetime.strptime(col[5].value, "%d/%m/%Y").strftime("%d/%m/%Y"),
+            DateOfBirth = checkDate(col[5].value),
             profileID = col[6].value,
             Identity = col[7].value,
             phone = col[8].value,
             address = col[9].value,
             email = col[10].value, 
-            #https://stackoverflow.com/questions/31359150/convert-date-from-excel-in-number-format-to-date-format-python
-            fromDate = datetime(*xlrd.xldate_as_tuple(col[11].value, 0)).strftime('%d/%m/%Y'),
-            toDate = datetime(*xlrd.xldate_as_tuple(col[12].value, 0)).strftime('%d/%m/%Y'),
-            attachment =  col[7].value + ".pdf"
+            fromDate = checkDate(col[11].value),
+            toDate = checkDate(col[12].value),
+            attachment =  col[7].value + ".pdf",
             )
         try:
             info.save()
@@ -206,9 +206,8 @@ def saveDB(sheet):
         op = open("uploads/"+ col[7].value + ".pdf", "wb")
         # Close opened file
         op.close()
-        #createpdf
-        outputFile = "uploads/"+ col[7].value + ".pdf"
-        try:
-            createpdf(col[7].value,outputFile)
-        except:
-            HttpResponse('create PDF error')
+#sendmail()
+       
+def student(request):
+    info = Info.objects.all()
+    return render(request, 'boss/student.html',{'info': info})
