@@ -19,3 +19,4 @@ class Info(models.Model):
     attachment = models.CharField(max_length=200,null=True)
     status = models.IntegerField(default=0)
     wpdf = models.IntegerField(default=0)
+    sendmail = models.IntegerField(default=0)

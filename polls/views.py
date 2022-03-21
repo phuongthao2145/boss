@@ -91,6 +91,9 @@ def createpdf():
         packet.seek(0)
         # create a new PDF with Reportlab
         new_pdf = PdfFileReader(packet)
+        #create file
+        #Open a file
+        #op = open("uploads/"+ info.attachment, "wb")
         # read your existing PDF
         existing_pdf = PdfFileReader(open("uploads/GBNH.pdf", "rb"))
         output = PdfFileWriter()
@@ -108,9 +111,11 @@ def createpdf():
             Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
         except:
             HttpResponse('create PDF error')
-
+def updateSend(self):
+    info = Info.objects.filter(sendmail  = 0).update(sendmail = 1)
+    return HttpResponseRedirect(reverse('boss:index')) 
 def sendmail():
-    info = Info.objects.filter(wpdf=1,status=0).order_by('id')[:2]
+    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id')[:2]
     for to in info:
         email = to.email
         subject = "Giấy Báo Nhập Học"
@@ -201,11 +206,7 @@ def saveDB(sheet):
             info.save()
         except:
             return HttpResponse(col[11].value)
-        #create file
-        # Open a file
-        op = open("uploads/"+ col[7].value + ".pdf", "wb")
-        # Close opened file
-        op.close()
+        
 #sendmail()
        
 def student(request):

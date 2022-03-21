@@ -12,7 +12,7 @@ urlpatterns = [
     path('boss', views.index, name='index'),
     path('uploadfile', views.upload_file, name='uploadfile'),
     re_path(r'^readfile/(?P<filename>.+)$', views.readfile, name='readfile'),
-    path('sendmail/<mssv>',views.sendmail,name='sendmail'),
+    path('updatesend',views.updateSend,name='updatesend'),
     path('createpdf',views.createpdf,name='createpdf'),
     path('',views.student,name='student')
 ]
