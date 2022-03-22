@@ -1,8 +1,14 @@
 {% extends "boss/base.html" %}
 {% block title %}Index{% endblock %}
 
-{% block content %}
-<input class="form-control" id="myInput" type="text" placeholder="Nhập số điện thoại đăng ký  nhập học">
-
-
+{% block form %}
+<div class="col-md-5 col-12">
+    <form action="" method="GET">
+        {{ form }}
+        <input type="submit" class="btn btn-success" value="Tìm">
+</div>
+{% if info %}
+<h1>hello</h1>
+{{ info.attachment }}
+{% endif %}
 {% endblock %}

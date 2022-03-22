@@ -3,10 +3,10 @@
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from .forms import UploadFileForm
+from .forms import *
 from django.urls import reverse
 from polls.models import *
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required
 import os
 import openpyxl
 from pathlib import Path
@@ -14,7 +14,6 @@ from django import forms
 from django.core.mail import EmailMessage
 from django.conf import settings
 import io
-import PyPDF2
 from django.http import FileResponse
 import reportlab
 from reportlab.pdfgen import canvas
@@ -37,6 +36,7 @@ currentMonth = datetime.now().month
 currentYear = datetime.now().year
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
+@login_required
 def createpdf():
     infos = Info.objects.exclude(status=1).order_by('id')[:10]
     for info in infos:
@@ -111,9 +111,11 @@ def createpdf():
             Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
         except:
             HttpResponse('create PDF error')
+@login_required
 def updateSend(self):
     info = Info.objects.filter(sendmail  = 0).update(sendmail = 1)
     return HttpResponseRedirect(reverse('boss:index')) 
+@login_required
 def sendmail():
     info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id')[:2]
     for to in info:
@@ -132,11 +134,19 @@ def sendmail():
             to.refresh_from_db()
         except:
             HttpResponse('send mail error')
-
+def page_not_found_view(request, exception):
+    return render(request, '404.html', status=404)
+from django.http import FileResponse, Http404
+def pdf_view(request,attachment):
+    try:
+        return FileResponse(open('uploads/'+attachment, 'rb'), content_type='application/pdf')
+    except FileNotFoundError:
+        raise Http404()
+@login_required
 def index(request):
     info = Info.objects.all()
     return render(request, 'boss/index.html',{'info': info})
-
+@login_required
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -147,11 +157,13 @@ def upload_file(request):
         form = UploadFileForm()
     return render(request, 'boss/upload.html', {'form': form})
 
+@login_required
 def handle_uploaded_file(f):
     with open('uploads/' + f.name, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
 
+@login_required
 def readfile(request, filename):
     file_extension = os.path.splitext(filename)
     if file_extension[1] == '.xlsx':
@@ -169,8 +181,8 @@ def readfile(request, filename):
     # import info to DB
     try:
         saveDB(sheet)
-    except ex:
-        return HttpResponse('save db unsuccess' + ex)
+    except:
+        return HttpResponse('save db unsuccess')
     return HttpResponseRedirect(reverse('boss:index'))
 
 #https://stackoverflow.com/questions/31359150/convert-date-from-excel-in-number-format-to-date-format-python
@@ -181,6 +193,7 @@ def checkDate(myDate):
         myDate = datetime.strptime(myDate, "%d/%m/%Y").strftime("%d/%m/%Y")
     return myDate
 
+@login_required
 def saveDB(sheet):
     count = 0
     for col in sheet:
@@ -210,5 +223,12 @@ def saveDB(sheet):
 #sendmail()
        
 def student(request):
-    info = Info.objects.all()
-    return render(request, 'boss/student.html',{'info': info})
+    if(request.method == 'GET'):
+        form = SearchForm()
+        if form.is_valid():
+            handle_search(request,form.cleaned_data['keyword'])
+    return render(request, 'boss/student.html',{'form': form})
+
+def handle_search(request,keyword):
+    info = Info.objects.filter(phone='943727475').first()
+    return render(request,'boss/student.html',{'info':info})

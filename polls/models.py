@@ -13,7 +13,7 @@ class Info(models.Model):
     Identity = models.CharField(max_length=200,null=True)
     email = models.CharField(max_length=200,null=True)
     address = models.EmailField(max_length=200,null=True)
-    phone = models.IntegerField(null=True)
+    phone = models.CharField(max_length=20,null=True)
     fromDate = models.CharField(max_length=200,null=True)
     toDate =  models.CharField(max_length=200,null=True)
     attachment = models.CharField(max_length=200,null=True)
