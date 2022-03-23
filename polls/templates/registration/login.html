@@ -1,37 +1,39 @@
 {% extends "boss/base.html" %}
+{% block style %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'boss/login.css'%}">
+{% endblock %}
 {% block content %}
 
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<p style="text-align: center;">Your username and password didn't match. Please try again.</p>
 {% endif %}
 
 {% if next %}
     {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
+    <p style="text-align: center;">Your account doesn't have access to this page. To proceed,
     please login with an account that has access.</p>
     {% else %}
-    <p>Please login to see this page.</p>
+    <p style="text-align: center;">Please login to see this page.</p>
     {% endif %}
 {% endif %}
 
 <form method="post" action="{% url 'login' %}">
 {% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login">
-<input type="hidden" name="next" value="{{ next }}">
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+      <!-- Tabs Titles -->
+      <!-- Login Form -->
+        <p>{{ form.username }}</p>
+        <p>{{ form.password }}</p>
+        <input type="submit" class="fadeIn fourth" value="Log In">
+        <input type="hidden" name="next" value="{{ next }}">
+      <!-- Remind Passowrd -->
+      <div id="formFooter">
+        <a class="underlineHover" href="{% url 'password_reset' %}">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
 </form>
-
-{# Assumes you set up the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
 
 {% endblock %}

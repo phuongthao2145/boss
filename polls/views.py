@@ -14,6 +14,7 @@ from django import forms
 from django.core.mail import EmailMessage
 from django.conf import settings
 import io
+import PyPDF2
 from django.http import FileResponse
 import reportlab
 from reportlab.pdfgen import canvas
@@ -29,7 +30,7 @@ from datetime import datetime
 from django.conf import settings
 reportlab.rl_config.TTFSearchPath.append(str(settings.BASE_DIR) + '/polls/lib/reportlabs/fonts')
 #https://stackoverflow.com/questions/4899885/how-to-set-any-font-in-reportlab-canvas-in-python
-pdfmetrics.registerFont(TTFont('TNR', 'times new roman.ttf'))
+pdfmetrics.registerFont(TTFont('TNR', 'font-times-new-roman (chuan).ttf'))
 pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
 currentDay = datetime.now().day
 currentMonth = datetime.now().month
@@ -43,7 +44,7 @@ def createpdf():
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=letter)
         can.setFont("TNR-B", 12)
-        name = "%s" % info.fname + " " +"%s" % info.lname
+        name = u"%s" % info.fname + " " +"%s" % info.lname
         can.drawString(110, 639, name)
         #set address
         addr = info.address
@@ -52,7 +53,7 @@ def createpdf():
         wraped_text = u"\n".join(textwrap.wrap(addr,40))
         t_message = can.beginText()
         t_message.setTextOrigin(100,620)
-        t_message.textLines(wraped_text)
+        t_message.textLines(wraped_text.encode('utf8'))
         can.drawText(t_message)
         #set date of birth
         dateOfBirth =info.DateOfBirth
@@ -158,7 +159,6 @@ def handle_uploaded_file(f):
     with open('uploads/' + f.name, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-
 def readfile(request, filename):
     file_extension = os.path.splitext(filename)
     if file_extension[1] == '.xlsx':
@@ -215,14 +215,8 @@ def saveDB(sheet):
             return HttpResponse(col[11].value)
         
 #sendmail()
-       
 def student(request):
     if(request.method == 'GET'):
-        form = SearchForm()
-        if form.is_valid():
-            handle_search(request,form.cleaned_data['keyword'])
-    return render(request, 'boss/student.html',{'form': form})
-
-def handle_search(request,keyword):
-    info = Info.objects.filter(phone='943727475').first()
-    return render(request,'boss/student.html',{'info':info})
+        info = Info.objects.filter(phone=request.GET.get('keyword'),wpdf=1).first()
+        return render(request,'boss/student.html',{'info':info})
+    return render(request, 'boss/student.html')
