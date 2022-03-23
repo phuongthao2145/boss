@@ -36,9 +36,8 @@ currentMonth = datetime.now().month
 currentYear = datetime.now().year
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
-@login_required
 def createpdf():
-    infos = Info.objects.exclude(status=1).order_by('id')[:10]
+    infos = Info.objects.order_by('id')[:10]
     for info in infos:
         #info student
         packet = io.BytesIO()
@@ -111,11 +110,10 @@ def createpdf():
             Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
         except:
             HttpResponse('create PDF error')
-@login_required
 def updateSend(self):
     info = Info.objects.filter(sendmail  = 0).update(sendmail = 1)
     return HttpResponseRedirect(reverse('boss:index')) 
-@login_required
+
 def sendmail():
     info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id')[:2]
     for to in info:
@@ -146,7 +144,6 @@ def pdf_view(request,attachment):
 def index(request):
     info = Info.objects.all()
     return render(request, 'boss/index.html',{'info': info})
-@login_required
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -157,13 +154,11 @@ def upload_file(request):
         form = UploadFileForm()
     return render(request, 'boss/upload.html', {'form': form})
 
-@login_required
 def handle_uploaded_file(f):
     with open('uploads/' + f.name, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
 
-@login_required
 def readfile(request, filename):
     file_extension = os.path.splitext(filename)
     if file_extension[1] == '.xlsx':
@@ -193,7 +188,6 @@ def checkDate(myDate):
         myDate = datetime.strptime(myDate, "%d/%m/%Y").strftime("%d/%m/%Y")
     return myDate
 
-@login_required
 def saveDB(sheet):
     count = 0
     for col in sheet:
