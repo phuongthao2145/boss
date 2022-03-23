@@ -38,7 +38,7 @@ currentYear = datetime.now().year
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
 def createpdf():
-    infos = Info.objects.order_by('id')[:10]
+    infos = Info.objects.order_by('id').reverse()[:10]
     for info in infos:
         #info student
         packet = io.BytesIO()
@@ -116,7 +116,7 @@ def updateSend(self):
     return HttpResponseRedirect(reverse('boss:index')) 
 
 def sendmail():
-    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id')[:2]
+    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:2]
     for to in info:
         email = to.email
         subject = "Giấy Báo Nhập Học"
@@ -143,7 +143,7 @@ def pdf_view(request,attachment):
         raise Http404()
 @login_required
 def index(request):
-    info = Info.objects.all()
+    info = Info.objects.all().order_by('id').reverse()
     return render(request, 'boss/index.html',{'info': info})
 def upload_file(request):
     if request.method == 'POST':
