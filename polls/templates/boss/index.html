@@ -6,12 +6,13 @@
     <table class="table table-striped table-hover js-sort-table table-responsive">
     <thead class="sticky-top bg-light" style="z-index:5">
         <tr>
-            <th>Major</th>
-            <th>Identity</th>
-            <th>Name</th>
+            <th>Ngành</th>
+            <th>CMND/CCCD</th>
+            <th>Họ Tên</th>
+            <th>Số điện thoại</th>
             <th>Email</th>
-            <th>Attachment</th>
-            <th>Status</th>
+            <th>Giấy báo</th>
+            <th>Gửi mail</th>
         </tr>
     </thead>
     <tbody id="myTable">
@@ -20,6 +21,7 @@
             <td>{{ row.major }}</td>
             <td>{{ row.Identity }}</td>
             <td>{{ row.fname }} {{row.lname}}</td>
+            <td>{{ row.phone }}</td>
             <td>{{ row.email }}</td>
             <td><i class="fas fa-file-pdf text-secondary"></i> 
                 {% if row.wpdf == 1%}
@@ -37,6 +39,6 @@
         {%endfor%}
     </tbody>
 </table>
-<a href="{% url 'boss:updatesend' %}" class="btn btn-success">Send Mail</a>
+<a href="{% url 'boss:updatesend' %}" class="btn btn-outline-secondary">Gửi mail</a>
 </div>
 {% endblock %}

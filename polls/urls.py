@@ -12,8 +12,10 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('boss', views.index, name='index'),
+    path('changeform2', views.changeform2, name='changeform2'),
     path('uploadfile', views.upload_file, name='uploadfile'),
-    path('changeform', views.changeform, name='changeform'),
+    path('changeform1', views.changeform1, name='changeform1'),
+    
     re_path(r'^readfile/(?P<filename>.+)$', views.readfile, name='readfile'),
     path('updatesend',views.updateSend,name='updatesend'),
     path('createpdf',views.createpdf,name='createpdf'),

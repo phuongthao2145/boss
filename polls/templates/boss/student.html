@@ -3,12 +3,13 @@
 
 {% block form %}
 <div class="col-md-5 col-12">
+    <p class="h3-title" style="font-weight:bold;color:#1591EB">TRA CỨU GIẤY BÁO NHẬP HỌC  -  GIẤY BÁO TRÚNG TUYỂN</p>
     <form action="" method="GET">
         <div class="input-group mb-3">
             <input name="keyword" type="number" class="form-control" 
-            placeholder="Nhập số điện thoại" value="{{ request.GET.keyword}}">
+            placeholder="Nhập số điện thoại đã đăng ký xét tuyển" value="{{ request.GET.keyword}}">
             <div class="input-group-append">
-              <button class="btn btn-success" type="submit">Tìm</button>
+              <button class="btn btn-outline-secondary" type="submit">Tìm</button>
             </div>
           </div>
     </form>
@@ -20,25 +21,25 @@
     <table class="table table-striped table-hover js-sort-table table-responsive">
     <thead class="sticky-top bg-light" style="z-index:5">
         <tr>
-            <th>Major</th>
-            <th>Identity</th>
-            <th>Name</th>
+            <th>Ngành</th>
+            <th>CMND/CCCD</th>
+            <th>Họ Tên</th>
             <th>Email</th>
-            <th>Attachment</th>
-            <th>Status</th>
+            <th>Giấy Báo</th>
+            <th>Gửi mail</th>
         </tr>
     </thead>
     <tbody id="myTable">
         <tr>
             <td>{{ info.major }}</td>
             <td>{{ info.Identity }}</td>
-            <td>{{ info.fname }} {{row.lname}}</td>
+            <td>{{ info.fname }} {{ info.lname}}</td>
             <td>{{ info.email }}</td>
             <td><i class="fas fa-file-pdf text-secondary"></i> <a class="text-dark" href="{% url 'boss:viewpdf' info.attachment %}" target="_blank">{{ info.attachment}}</a> </td>
             <td>{% if info.status == 1%}
-                Send 
+                Đã gửi 
                 {% else %}
-                unsent
+                Chưa gửi
                 {%endif%}
             </td>
         </tr>

@@ -3,15 +3,18 @@
 
 {% block form %}
 <div class="col-md-5 col-12">
-    <h3>Thay đổi biểu mẫu trúng tuyển</h3>
+    <h3>Chọn biểu mẫu {% if id == 1 %} nhập học {% else %} trúng tuyển {% endif %}</h3>
+   
     <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
             <div class="input-group mb-3">
-            {{ form.as_table }}
-                <button type="submit" class="input-group-text" for="inputGroupFile02">Upload</button>
+            {{ form.as_table }} 
+            <button type="submit" class="input-group-text" for="inputGroupFile02">Upload</button>
             </div>
     </form>
+{% if text%}
+<span id="my_modal">{{ text }}</span>
+ {%endif%}
+    
 </div>
-
-
 {% endblock %}

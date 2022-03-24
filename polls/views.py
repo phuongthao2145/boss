@@ -35,20 +35,25 @@ pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
 currentDay = datetime.now().day
 currentMonth = datetime.now().month
 currentYear = datetime.now().year
-def changeform(request):
+def changeform(request,id):
+    text="Cập nhật thành công"
     if request.method == 'POST':
         form = ChangeFormForm(request.POST, request.FILES)
         if form.is_valid():
             f = request.FILES['file']
-            type = Type.objects.filter(id=2)
+            type = Type.objects.filter(id=id)
             type.update(formName=f.name)
             with open('uploads/' + f.name, 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            return render(request, 'boss/changeform.html', {'form': form})
+            return render(request, 'boss/changeform.html', {'form': form,'id':id,'text':text})
     else:
         form = ChangeFormForm()
-    return render(request, 'boss/changeform.html', {'form': form})
+    return render(request, 'boss/changeform.html', {'form': form,'id':id})
+def changeform1(request):
+    return changeform(request,1)
+def changeform2(request):
+    return changeform(request,2)
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
 def createpdf():
@@ -58,7 +63,7 @@ def createpdf():
             #info student
             packet = io.BytesIO()
             can = canvas.Canvas(packet, pagesize=letter)
-            can.setFont("TNR-B", 12)
+            can.setFont("TNR", 12)
             name = u"%s" % info.fname + " " +"%s" % info.lname
             can.drawString(110, 639, name)
             #set address
@@ -67,7 +72,7 @@ def createpdf():
             #20 is line width
             wraped_text = u"\n".join(textwrap.wrap(addr,40))
             t_message = can.beginText()
-            t_message.setTextOrigin(100,620)
+            t_message.setTextOrigin(102,620)
             t_message.textLines(wraped_text.encode('utf8'))
             can.drawText(t_message)
             #set date of birth
@@ -109,6 +114,66 @@ def createpdf():
             #create file
             # read your existing PDF
             formName = Type.objects.filter(id=info.formType_id).first().formName
+            existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
+            output = PdfFileWriter()
+            # add the "watermark" (which is the new pdf) on the existing page
+            page = existing_pdf.getPage(0)
+            page.mergePage(new_pdf.getPage(0))
+            output.addPage(page)
+            #output.addPage(new_pdf.getPage(0))
+            # finally, write "output" to a real file
+            outputFile = "uploads/"+ info.attachment
+            outputStream = open(outputFile , "wb")
+            try:
+                output.write(outputStream)
+                outputStream.close()
+                Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
+            except:
+                HttpResponse('create PDF error')
+        else:
+            #info student
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+            can.setFont("TNR", 12)
+            #set name
+            name = u"%s" % info.fname + " " +"%s" % info.lname
+            can.drawString(140, 644, name)
+            #set address
+            addr = info.address
+            #https://www.tutorialspoint.com/python-text-wrapping-and-filling
+            #20 is line width
+            wraped_text = u"\n".join(textwrap.wrap(addr,40))
+            t_message = can.beginText()
+            t_message.setTextOrigin(139,625)
+            t_message.textLines(wraped_text.encode('utf8'))
+            can.drawText(t_message)
+            #set date of birth
+            dateOfBirth =info.DateOfBirth
+            can.drawString(411, 644, dateOfBirth)
+            #set gender
+            gender = "Nữ" if(info.gender == 1) else "Nam"
+            can.drawString(383, 625, gender)
+            #set major
+            major = info.major
+            can.drawCentredString(300, 505, major)
+            #set from
+            from_d = info.fromDate
+            can.drawString(100, 303, from_d)
+            #set to
+            to_d = info.toDate
+            can.drawString(210,303, to_d)
+            #save
+            can.showPage()
+            can.save()
+            print(can.drawText(t_message))
+            #move to the beginning of the StringIO buffer
+            packet.seek(0)
+            # create a new PDF with Reportlab
+            new_pdf = PdfFileReader(packet)
+            #create file
+            # read your existing PDF
+            formName = Type.objects.filter(id=info.formType_id).first().formName
+            print(formName)
             existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
             output = PdfFileWriter()
             # add the "watermark" (which is the new pdf) on the existing page
@@ -188,10 +253,10 @@ def readfile(request, filename):
         return HttpResponse(("File not supported!"))
     # create attach file
     # import info to DB
-    try:
-        saveDB(sheet)
-    except:
-        return HttpResponse('save db unsuccess')
+    #try:
+    saveDB(sheet)
+    #except:
+        #return HttpResponse('save db unsuccess')
     return HttpResponseRedirect(reverse('boss:index'))
 
 #https://stackoverflow.com/questions/31359150/convert-date-from-excel-in-number-format-to-date-format-python
@@ -207,7 +272,8 @@ def saveDB(sheet):
     for col in sheet:
         if(count == 0):
             count += 1
-            continue
+            continue    
+        prefix = "GBNH" if col[13].value == 1 else "TBTT"
         info = Info(majorID = col[0].value,
             major = col[1].value,
             fname = col[2].value,
@@ -221,12 +287,13 @@ def saveDB(sheet):
             email = col[10].value, 
             fromDate = checkDate(col[11].value),
             toDate = checkDate(col[12].value),
-            attachment =  col[7].value + ".pdf",
+            attachment =  prefix+"-"+col[7].value + ".pdf",
+            formType_id = col[13].value
             )
         try:
             info.save()
         except:
-            return HttpResponse(col[11].value)
+            return HttpResponse('save db fail!')
         
 #sendmail()
 def student(request):
