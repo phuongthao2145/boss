@@ -13,6 +13,7 @@ urlpatterns = [
     path('accounts/logout', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('boss', views.index, name='index'),
     path('uploadfile', views.upload_file, name='uploadfile'),
+    path('changeform', views.changeform, name='changeform'),
     re_path(r'^readfile/(?P<filename>.+)$', views.readfile, name='readfile'),
     path('updatesend',views.updateSend,name='updatesend'),
     path('createpdf',views.createpdf,name='createpdf'),

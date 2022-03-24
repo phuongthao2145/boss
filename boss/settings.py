@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'ds!e!6(#77*rj%wt4k=dgc00t&p+v3lspn(w6^_s@+*_cu+elz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 DEBUG404 = True
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost']
@@ -40,6 +40,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Application definition
 
 INSTALLED_APPS = [
+    'active_link',
     'polls.apps.PollsConfig',
     'django.contrib.admin',
     'django.contrib.auth',

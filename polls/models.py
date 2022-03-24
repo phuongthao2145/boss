@@ -1,6 +1,12 @@
 from django.db import models
 
 # Create your models here.
+
+class Type(models.Model):
+    typeName = models.CharField(max_length=200,null=True)
+    formName =  models.CharField(max_length=200,null=True)
+    def __str__(self):
+        return self.typeName   
 class Info(models.Model):
     profileID = models.CharField(max_length=200)
     attachment = models.CharField(max_length=200)
@@ -20,3 +26,9 @@ class Info(models.Model):
     status = models.IntegerField(default=0)
     wpdf = models.IntegerField(default=0)
     sendmail = models.IntegerField(default=0)
+    formType = models.ForeignKey('Type', on_delete=models.RESTRICT, null=True, related_name='type', blank=True)
+    def __str__(self):
+        return self.profileID
+
+
+

@@ -35,82 +35,96 @@ pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
 currentDay = datetime.now().day
 currentMonth = datetime.now().month
 currentYear = datetime.now().year
+def changeform(request):
+    if request.method == 'POST':
+        form = ChangeFormForm(request.POST, request.FILES)
+        if form.is_valid():
+            f = request.FILES['file']
+            type = Type.objects.filter(id=2)
+            type.update(formName=f.name)
+            with open('uploads/' + f.name, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+            return render(request, 'boss/changeform.html', {'form': form})
+    else:
+        form = ChangeFormForm()
+    return render(request, 'boss/changeform.html', {'form': form})
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
 def createpdf():
     infos = Info.objects.order_by('id').reverse()[:10]
     for info in infos:
-        #info student
-        packet = io.BytesIO()
-        can = canvas.Canvas(packet, pagesize=letter)
-        can.setFont("TNR-B", 12)
-        name = u"%s" % info.fname + " " +"%s" % info.lname
-        can.drawString(110, 639, name)
-        #set address
-        addr = info.address
-        #https://www.tutorialspoint.com/python-text-wrapping-and-filling
-        #20 is line width
-        wraped_text = u"\n".join(textwrap.wrap(addr,40))
-        t_message = can.beginText()
-        t_message.setTextOrigin(100,620)
-        t_message.textLines(wraped_text.encode('utf8'))
-        can.drawText(t_message)
-        #set date of birth
-        dateOfBirth =info.DateOfBirth
-        can.drawString(411, 639, dateOfBirth)
-        #set gender
-        gender = "Nữ" if(info.gender == 1) else "Nam"
-        can.drawString(383, 620, gender)
-        #set p_object
-        p_object = '2'
-        can.drawString(453, 601, p_object)
-        #set p_area
-        p_area = '2'
-        can.drawString(442, 581, p_area)
-        #set major
-        major = info.major
-        can.drawCentredString(300, 466, major)
-        #set from
-        from_d = info.fromDate
-        can.drawString(215, 426, from_d)
-        #set to
-        to_d = info.toDate
-        can.drawString(346, 426, to_d)
-        #set day
-        can.drawString(423, 221, str(currentDay))
-        #set month
-        can.drawString(472, 221, str(currentMonth))
-        #set carpentry
-        carpentry = "Ký tên"
-        can.drawString(400, 150, carpentry)
-        #save
-        can.showPage()
-        can.save()
-        print(can.drawText(t_message))
-        #move to the beginning of the StringIO buffer
-        packet.seek(0)
-        # create a new PDF with Reportlab
-        new_pdf = PdfFileReader(packet)
-        #create file
-        #Open a file
-        #op = open("uploads/"+ info.attachment, "wb")
-        # read your existing PDF
-        existing_pdf = PdfFileReader(open("uploads/GBNH.pdf", "rb"))
-        output = PdfFileWriter()
-        # add the "watermark" (which is the new pdf) on the existing page
-        page = existing_pdf.getPage(0)
-        page.mergePage(new_pdf.getPage(0))
-        output.addPage(page)
-        #output.addPage(new_pdf.getPage(0))
-        # finally, write "output" to a real file
-        outputFile = "uploads/"+ info.attachment
-        outputStream = open(outputFile , "wb")
-        try:
-            output.write(outputStream)
-            outputStream.close()
-            Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
-        except:
-            HttpResponse('create PDF error')
+        if info.formType_id == 1:
+            #info student
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+            can.setFont("TNR-B", 12)
+            name = u"%s" % info.fname + " " +"%s" % info.lname
+            can.drawString(110, 639, name)
+            #set address
+            addr = info.address
+            #https://www.tutorialspoint.com/python-text-wrapping-and-filling
+            #20 is line width
+            wraped_text = u"\n".join(textwrap.wrap(addr,40))
+            t_message = can.beginText()
+            t_message.setTextOrigin(100,620)
+            t_message.textLines(wraped_text.encode('utf8'))
+            can.drawText(t_message)
+            #set date of birth
+            dateOfBirth =info.DateOfBirth
+            can.drawString(411, 639, dateOfBirth)
+            #set gender
+            gender = "Nữ" if(info.gender == 1) else "Nam"
+            can.drawString(383, 620, gender)
+            #set p_object
+            p_object = '2'
+            can.drawString(453, 601, p_object)
+            #set p_area
+            p_area = '2'
+            can.drawString(442, 581, p_area)
+            #set major
+            major = info.major
+            can.drawCentredString(300, 466, major)
+            #set from
+            from_d = info.fromDate
+            can.drawString(215, 426, from_d)
+            #set to
+            to_d = info.toDate
+            can.drawString(346, 426, to_d)
+            #set day
+            can.drawString(423, 221, str(currentDay))
+            #set month
+            can.drawString(472, 221, str(currentMonth))
+            #set carpentry
+            carpentry = "Ký tên"
+            can.drawString(400, 150, carpentry)
+            #save
+            can.showPage()
+            can.save()
+            print(can.drawText(t_message))
+            #move to the beginning of the StringIO buffer
+            packet.seek(0)
+            # create a new PDF with Reportlab
+            new_pdf = PdfFileReader(packet)
+            #create file
+            # read your existing PDF
+            formName = Type.objects.filter(id=info.formType_id).first().formName
+            existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
+            output = PdfFileWriter()
+            # add the "watermark" (which is the new pdf) on the existing page
+            page = existing_pdf.getPage(0)
+            page.mergePage(new_pdf.getPage(0))
+            output.addPage(page)
+            #output.addPage(new_pdf.getPage(0))
+            # finally, write "output" to a real file
+            outputFile = "uploads/"+ info.attachment
+            outputStream = open(outputFile , "wb")
+            try:
+                output.write(outputStream)
+                outputStream.close()
+                Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
+            except:
+                HttpResponse('create PDF error')
 def updateSend(self):
     info = Info.objects.filter(sendmail  = 0).update(sendmail = 1)
     return HttpResponseRedirect(reverse('boss:index')) 

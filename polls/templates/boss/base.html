@@ -2,6 +2,7 @@
 <html lang="en-us">
 <head>
     {% load static %}
+    {% load active_link_tags %}
     
     <title>{% block title %}Luckbunny{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -49,12 +50,27 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'boss:index' %}">Home</a>
+          <a class="nav-link {% active_link 'boss:index' 'active' %}" aria-current="page" href="{% url 'boss:index' %}">Trang chủ</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'boss:uploadfile' %}">Import file</a>
+          <a class="nav-link {% active_link 'boss:uploadfile' 'active' %}" href="{% url 'boss:uploadfile' %}">Thêm Danh Sách</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% active_link 'boss:changeform' 'active' %}" href="{% url 'boss:changeform' %}">Đổi biểu mẫu trúng tuyển</a>
         </li>
       </ul>
+      <script>
+        var path = location.pathname;
+        if (path == "/boss") {
+            pageName = "home";
+        } else if (path.startsWith("/myapp/child1")){
+            pageName = "child1";
+        } else if (path.startsWith("/myapp")) {
+            pageName = "parent";
+        }
+    
+        document.querySelector("li[data-link-name='" + pageName + "']").classList += "active";
+    </script>
     </div>
   </div>
 </nav>
