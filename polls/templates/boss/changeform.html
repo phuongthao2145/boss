@@ -15,6 +15,18 @@
 {% if text%}
 <span id="my_modal">{{ text }}</span>
  {%endif%}
-    
+    <script>
+$(function () {
+    $('input[type=file]').change(function () {
+        var val = $(this).val().toLowerCase(),
+            regex = new RegExp("(.*?)\.(pdf)$");
+
+        if (!(regex.test(val))) {
+            $(this).val('');
+            alert('Vui lòng chọn file PDF');
+        }
+    });
+});
+    </script>
 </div>
 {% endblock %}

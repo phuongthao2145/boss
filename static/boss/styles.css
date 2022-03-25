@@ -1,3 +1,8 @@
+@media (min-width: 950px) { 
+ #branding{
+     text-align: left !important;
+ }
+}
 .fas{
        font-size: 18pt;
        padding-left:20px
@@ -12,9 +17,6 @@ header{
 header .site_description {
     color: #FF0;
     font-size: 18px;
-    line-height: 0.1;
-    margin: auto;
-    padding: 10px 0px 10px 0px;
 }
 header h1, header .site_name {
     color: #FFF;

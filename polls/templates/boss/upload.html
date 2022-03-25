@@ -2,8 +2,11 @@
 {% block title %}Upload File{% endblock %}
 
 {% block form %}
-<div class="col-md-5 col-12">
-    <h3>Choose an excel file (*.xls,*.xlsx) to import</h3>
+{% load static %}
+<div class="col-md-12 col-12">
+    <h3>Danh sách phải có định dạng *.xls hoặc *.xlsx</h3>
+    <a class="text-primary text-decoration-none" href="{% static 'boss/sampleExcel.xls'%}" download>Tải mẫu</a>
+    <p class="py-2"></p>
     <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
             <div class="input-group mb-3">
@@ -12,6 +15,18 @@
             </div>
     </form>
 </div>
-
+<script>
+    $(function () {
+        $('input[type=file]').change(function () {
+            var val = $(this).val().toLowerCase(),
+                regex = new RegExp("(.*?)\.(xls|xlsx)$");
+    
+            if (!(regex.test(val))) {
+                $(this).val('');
+                alert('Vui lòng chọn đúng đinh dạng file *.xls hoặc *.xlsx');
+            }
+        });
+    });
+        </script>
 
 {% endblock %}
