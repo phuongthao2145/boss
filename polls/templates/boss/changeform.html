@@ -3,13 +3,14 @@
 
 {% block form %}
 <div class="col-md-5 col-12">
-    <h3>Chọn biểu mẫu {% if id == 1 %} nhập học {% else %} trúng tuyển {% endif %}</h3>
-   
+    <h5>Chọn biểu mẫu PDF {% if id == 1 %} nhập học {% else %} trúng tuyển {% endif %} </h5>
+    <p class="text-secondary pb-3"> Xem biểu mẫu hiện tại <a class="text-primary" href="{% url 'boss:viewpdf' attachment %}" target="_blank">tại đây</a> 
+</p>
     <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
             <div class="input-group mb-3">
             {{ form.as_table }} 
-            <button type="submit" class="input-group-text" for="inputGroupFile02">Upload</button>
+            <button type="submit" class="input-group-text" for="inputGroupFile02">Cập nhật</button>
             </div>
     </form>
 {% if text%}

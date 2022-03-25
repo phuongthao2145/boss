@@ -2,8 +2,8 @@
 {% block title %}Index{% endblock %}
 
 {% block form %}
-<div class="col-md-5 col-12">
-    <p class="h3-title" style="font-weight:bold;color:#1591EB">TRA CỨU GIẤY BÁO NHẬP HỌC  -  GIẤY BÁO TRÚNG TUYỂN</p>
+<h4 class="h3-title" style="font-weight:bold;color:#1591EB">TRA CỨU GIẤY BÁO NHẬP HỌC  -  GIẤY BÁO TRÚNG TUYỂN</h4>
+<div class="col-12 col-md-5">
     <form action="" method="GET">
         <div class="input-group mb-3">
             <input name="keyword" type="number" class="form-control" 
@@ -47,6 +47,6 @@
 </table>
 </div>
 {% elif 'keyword' in request.GET %}
-<h3>Số  điện thoại không tồn tại</h3>
+<h5>Số  điện thoại không tồn tại</h5>
 {% endif %}
 {% endblock %}

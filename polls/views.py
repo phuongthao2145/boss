@@ -37,19 +37,21 @@ currentMonth = datetime.now().month
 currentYear = datetime.now().year
 def changeform(request,id):
     text="Cập nhật thành công"
+    type = Type.objects.filter(id=id)
     if request.method == 'POST':
         form = ChangeFormForm(request.POST, request.FILES)
         if form.is_valid():
-            f = request.FILES['file']
-            type = Type.objects.filter(id=id)
+            f = request.FILES['file']        
             type.update(formName=f.name)
             with open('uploads/' + f.name, 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
+            
             return render(request, 'boss/changeform.html', {'form': form,'id':id,'text':text})
     else:
         form = ChangeFormForm()
-    return render(request, 'boss/changeform.html', {'form': form,'id':id})
+    attachment = type.first().formName
+    return render(request, 'boss/changeform.html', {'form': form,'id':id,'attachment':attachment})
 def changeform1(request):
     return changeform(request,1)
 def changeform2(request):
@@ -127,7 +129,7 @@ def createpdf():
             try:
                 output.write(outputStream)
                 outputStream.close()
-                Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
+                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now)
             except:
                 HttpResponse('create PDF error')
         else:
@@ -173,7 +175,6 @@ def createpdf():
             #create file
             # read your existing PDF
             formName = Type.objects.filter(id=info.formType_id).first().formName
-            print(formName)
             existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
             output = PdfFileWriter()
             # add the "watermark" (which is the new pdf) on the existing page
@@ -191,15 +192,19 @@ def createpdf():
             except:
                 HttpResponse('create PDF error')
 def updateSend(self):
-    info = Info.objects.filter(sendmail  = 0).update(sendmail = 1)
+    info = Info.objects.filter(sendmail  = 0).update(sendmail = 1,updated_at=datetime.now)
     return HttpResponseRedirect(reverse('boss:index')) 
 
 def sendmail():
-    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:2]
+    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:1]
     for to in info:
+        if to.formType_id == 1:
+            subject = "Trường Cao Đẳng Công Nghệ Thủ Đức - Giấy báo nhập học Cao đẳng năm 2022"
+            body = "Căn cứ kết quả xét tuyển của Hội đồng tuyển sinh năm 2022, Chủ tịch Hội đồng tuyển sinh Trường Cao đẳng Công nghệ Thủ Đức trân trọng thông báo Anh/Chị đã trúng tuyển trình độ Cao đẳng chính quy năm 2022(đính kèm giấy báo nhập học). Xin chúc mừng Anh/Chị"
+        else:   
+            subject = "Trường Cao đẳng Công nghệ Thủ Đức - Thông báo trúng tuyển Cao đẳng năm 2022"
+            body = "Căn cứ kết quả xét tuyển của Hội đồng tuyển sinh năm 2022, Chủ tịch Hội đồng tuyển sinh Trường Cao đẳng Công nghệ Thủ Đức trân trọng thông báo Anh/Chị đã trúng tuyển trình độ Cao đẳng chính quy năm 2022(đính kèm thông báo trúng tuyển). Xin chúc mừng Anh/Chị."
         email = to.email
-        subject = "Giấy Báo Nhập Học"
-        body = "Giấy báo nhập học"
         from_email = None
         msg = EmailMessage(subject, body, from_email, [email])
         msg.attach_file('uploads/' + to.attachment)
@@ -208,7 +213,7 @@ def sendmail():
         try:
             #send mail
             msg.send()
-            Info.objects.filter(Identity=to.Identity).update(status = 1)
+            Info.objects.filter(Identity=to.Identity).update(status = 1,updated_at=datetime.now)
             to.refresh_from_db()
         except:
             HttpResponse('send mail error')
@@ -288,7 +293,8 @@ def saveDB(sheet):
             fromDate = checkDate(col[11].value),
             toDate = checkDate(col[12].value),
             attachment =  prefix+"-"+col[7].value + ".pdf",
-            formType_id = col[13].value
+            formType_id = col[13].value,
+            period = col[14].value
             )
         try:
             info.save()
