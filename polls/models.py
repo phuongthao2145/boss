@@ -1,13 +1,13 @@
 from django.db import models
 from datetime import datetime
-
 # Create your models here.
 
 class Type(models.Model):
     typeName = models.CharField(max_length=200,null=True)
     formName =  models.CharField(max_length=200,null=True)
-    created_at=models.DateField(default=datetime.now, blank=True)
-    updated_at=models.DateField(default=datetime.now, blank=True)
+    fullName = models.CharField(max_length=200,null=True)
+    created_at=models.DateTimeField(default=datetime.now, blank=True)
+    updated_at=models.DateTimeField(default=datetime.now, blank=True)
     def __str__(self):
         return self.typeName   
 class Info(models.Model):

@@ -9,8 +9,8 @@ class InfoAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at','updated_at','sendmail','status','wpdf']
 
 class TypeAdmin(admin.ModelAdmin):
-    fields = ['typeName','formName']
-    list_display = ('id','typeName','formName','created_at','updated_at')
+    fields = ['typeName','formName','fullName']
+    list_display = ('id','typeName','formName','fullName','created_at','updated_at')
     readonly_fields = ['created_at','updated_at']
     
 admin.site.register(Info, InfoAdmin)

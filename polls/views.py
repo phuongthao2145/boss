@@ -28,13 +28,15 @@ import textwrap
 from io import open
 from datetime import datetime
 from django.conf import settings
+from django.utils import timezone
+
 reportlab.rl_config.TTFSearchPath.append(str(settings.BASE_DIR) + '/polls/lib/reportlabs/fonts')
 #https://stackoverflow.com/questions/4899885/how-to-set-any-font-in-reportlab-canvas-in-python
 pdfmetrics.registerFont(TTFont('TNR', 'font-times-new-roman (chuan).ttf'))
 pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
-currentDay = datetime.now().day
-currentMonth = datetime.now().month
-currentYear = datetime.now().year
+currentDay = str(datetime.now().day)
+currentMonth = str(datetime.now().month)
+currentYear = str(datetime.now().year)
 def changeform(request,id):
     text="Cập nhật thành công"
     type = Type.objects.filter(id=id)
@@ -99,9 +101,9 @@ def createpdf():
             to_d = info.toDate
             can.drawString(346, 426, to_d)
             #set day
-            can.drawString(423, 221, str(currentDay))
+            can.drawString(423, 221, currentDay)
             #set month
-            can.drawString(472, 221, str(currentMonth))
+            can.drawString(472, 221, currentMonth)
             #set carpentry
             carpentry = "Ký tên"
             can.drawString(400, 150, carpentry)
@@ -129,7 +131,7 @@ def createpdf():
             try:
                 output.write(outputStream)
                 outputStream.close()
-                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now)
+                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now())
             except:
                 HttpResponse('create PDF error')
         else:
@@ -188,22 +190,19 @@ def createpdf():
             try:
                 output.write(outputStream)
                 outputStream.close()
-                Info.objects.filter(Identity=info.Identity).update(wpdf = 1)
+                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now())
             except:
                 HttpResponse('create PDF error')
 def updateSend(self):
-    info = Info.objects.filter(sendmail  = 0).update(sendmail = 1,updated_at=datetime.now)
+    info = Info.objects.filter(sendmail=0).update(sendmail = 1,updated_at=datetime.now())
     return HttpResponseRedirect(reverse('boss:index')) 
 
 def sendmail():
     info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:1]
     for to in info:
-        if to.formType_id == 1:
-            subject = "Trường Cao Đẳng Công Nghệ Thủ Đức - Giấy báo nhập học Cao đẳng năm 2022"
-            body = "Căn cứ kết quả xét tuyển của Hội đồng tuyển sinh năm 2022, Chủ tịch Hội đồng tuyển sinh Trường Cao đẳng Công nghệ Thủ Đức trân trọng thông báo Anh/Chị đã trúng tuyển trình độ Cao đẳng chính quy năm 2022(đính kèm giấy báo nhập học). Xin chúc mừng Anh/Chị"
-        else:   
-            subject = "Trường Cao đẳng Công nghệ Thủ Đức - Thông báo trúng tuyển Cao đẳng năm 2022"
-            body = "Căn cứ kết quả xét tuyển của Hội đồng tuyển sinh năm 2022, Chủ tịch Hội đồng tuyển sinh Trường Cao đẳng Công nghệ Thủ Đức trân trọng thông báo Anh/Chị đã trúng tuyển trình độ Cao đẳng chính quy năm 2022(đính kèm thông báo trúng tuyển). Xin chúc mừng Anh/Chị."
+        type = Type.objects.filter(id=to.formType_id).first()
+        subject = "Trường Cao Đẳng Công Nghệ Thủ Đức - "+type.fullName+" Cao đẳng đợt "+str(to.period)+" năm " + currentYear
+        body = "Căn cứ kết quả xét tuyển của Hội đồng tuyển sinh đợt "+str(to.period)+" năm "+currentYear+", Chủ tịch Hội đồng tuyển sinh Trường Cao đẳng Công nghệ Thủ Đức trân trọng thông báo Anh/Chị đã trúng tuyển trình độ Cao đẳng chính quy năm "+currentYear+" (đính kèm "+type.fullName+"). Xin chúc mừng Anh/Chị"
         email = to.email
         from_email = None
         msg = EmailMessage(subject, body, from_email, [email])
@@ -213,7 +212,7 @@ def sendmail():
         try:
             #send mail
             msg.send()
-            Info.objects.filter(Identity=to.Identity).update(status = 1,updated_at=datetime.now)
+            Info.objects.filter(Identity=to.Identity).update(status=1,updated_at=datetime.now())
             to.refresh_from_db()
         except:
             HttpResponse('send mail error')
