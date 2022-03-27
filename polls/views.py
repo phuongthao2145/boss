@@ -37,6 +37,7 @@ pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
 currentDay = str(datetime.now().day)
 currentMonth = str(datetime.now().month)
 currentYear = str(datetime.now().year)
+@login_required
 def changeform(request,id):
     text="Cập nhật thành công"
     type = Type.objects.filter(id=id)
@@ -226,8 +227,9 @@ def pdf_view(request,attachment):
         raise Http404()
 @login_required
 def index(request):
-    info = Info.objects.all().order_by('id').reverse()
+    info = Info.objects.all().order_by('status')
     return render(request, 'boss/index.html',{'info': info})
+@login_required
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
