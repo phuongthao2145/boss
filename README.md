@@ -17,6 +17,6 @@ Functions:
   + import xls/xlsx file (data will be added to DB, then create 10 forms automatically every minute)
   + search (data table)
   + change form pdf (2 forms)
-  + send mail (when submit this button, 10 mail will be sent automatically every minute)
+  + send mail (when submit this button, 10 mails will be sent automatically every minute)
   
 Contact me: thaobtp@tdc.edu.vn
