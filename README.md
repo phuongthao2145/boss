@@ -18,4 +18,5 @@ Functions:
   + search (data table)
   + change form pdf (2 forms)
   + send mail (when submit this button, 10 mail will be sent automatically every minute)
-contact me: thaobtp@tdc.edu.vn
+  
+# contact me: thaobtp@tdc.edu.vn
