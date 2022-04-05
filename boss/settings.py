@@ -124,9 +124,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-EMAIL_HOST_USER = 'phuongthao2145@gmail.com'
-EMAIL_HOST_PASSWORD = 'dajrmpspxmisrssk'
-DEFAULT_FROM_EMAIL = 'phuongthao2145@gmail.com'
+EMAIL_HOST_USER = 'pqldt@tdc.edu.vn'
+EMAIL_HOST_PASSWORD = 'ykwomfjdlrmgjosf'
+DEFAULT_FROM_EMAIL = 'pqldt@tdc.edu.vn'
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

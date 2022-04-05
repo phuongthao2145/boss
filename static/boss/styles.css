@@ -29,7 +29,8 @@ header h1, header .site_name {
  footer{
     background: #1591EB;
     color:#fff;
-    padding:10px
+    padding:10px;
+    padding-left: 0;
  }
  footer a{
     text-decoration: none;
