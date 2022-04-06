@@ -147,7 +147,7 @@ def createpdf():
             addr = info.address
             #https://www.tutorialspoint.com/python-text-wrapping-and-filling
             #20 is line width
-            wraped_text = u"\n".join(textwrap.wrap(addr,40))
+            wraped_text = u"\n".join(textwrap.wrap(addr,35))
             t_message = can.beginText()
             t_message.setTextOrigin(139,625)
             t_message.textLines(wraped_text.encode('utf8'))
