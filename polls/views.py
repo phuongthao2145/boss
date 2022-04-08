@@ -155,8 +155,9 @@ def createpdf():
         page = existing_pdf.getPage(0)
         page.mergePage(new_pdf.getPage(0))
         output.addPage(page)
-        output.addPage(existing_pdf.getPage(1))
-        output.addPage(existing_pdf.getPage(2))
+        for pageNum in range(existing_pdf.numPages):
+            if pageNum > 0:
+                output.addPage(existing_pdf.getPage(pageNum))
         #output.addPage(new_pdf.getPage(0))
         # finally, write "output" to a real file
         outputFile = os.path.join(absolutepath,"uploads/"+ info.attachment)
