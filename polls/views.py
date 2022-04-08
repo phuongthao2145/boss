@@ -173,7 +173,7 @@ def updateSend(self):
     return HttpResponseRedirect(reverse('boss:index')) 
 
 def sendmail():
-    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:1]
+    info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:10]
     for to in info:
         type = Type.objects.filter(id=to.formType_id).first()
         subject = "Trường Cao Đẳng Công Nghệ Thủ Đức - "+type.fullName+" Cao đẳng đợt "+str(to.period)+" năm " + currentYear
