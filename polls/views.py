@@ -37,6 +37,8 @@ pdfmetrics.registerFont(TTFont('TNR-B', 'times new roman bold.ttf'))
 currentDay = str(datetime.now().day)
 currentMonth = str(datetime.now().month)
 currentYear = str(datetime.now().year)
+absolutepath = os.path.dirname(os.path.dirname(__file__))
+
 @login_required
 def changeform(request,id):
     text="Cập nhật thành công"
@@ -49,7 +51,6 @@ def changeform(request,id):
             with open('uploads/' + f.name, 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            
             return render(request, 'boss/changeform.html', {'form': form,'id':id,'text':text})
     else:
         form = ChangeFormForm()
@@ -65,76 +66,46 @@ def createpdf():
     infos = Info.objects.order_by('id').reverse()[:10]
     for info in infos:
         if info.formType_id == 1:
-            #info student
+             #info student
             packet = io.BytesIO()
             can = canvas.Canvas(packet, pagesize=letter)
             can.setFont("TNR", 12)
             name = u"%s" % info.fname + " " +"%s" % info.lname
-            can.drawString(110, 639, name)
+            can.drawString(113, 640, name)
             #set address
             addr = info.address
             #https://www.tutorialspoint.com/python-text-wrapping-and-filling
             #20 is line width
             wraped_text = u"\n".join(textwrap.wrap(addr,40))
             t_message = can.beginText()
-            t_message.setTextOrigin(102,620)
+            t_message.setTextOrigin(113,621)
             t_message.textLines(wraped_text.encode('utf8'))
             can.drawText(t_message)
             #set date of birth
             dateOfBirth =info.DateOfBirth
-            can.drawString(411, 639, dateOfBirth)
+            can.drawString(411, 640, dateOfBirth)
             #set gender
             gender = "Nữ" if(info.gender == 1) else "Nam"
-            can.drawString(383, 620, gender)
+            can.drawString(383, 621, gender)
             #set p_object
-            p_object = '2'
-            can.drawString(453, 601, p_object)
+            #p_object = '2'
+            #can.drawString(453, 601, p_object)
             #set p_area
-            p_area = '2'
-            can.drawString(442, 581, p_area)
+            #p_area = '2'
+            #can.drawString(442, 581, p_area)
             #set major
             major = info.major
-            can.drawCentredString(300, 466, major)
+            can.drawCentredString(300, 505, major)
             #set from
             from_d = info.fromDate
-            can.drawString(215, 426, from_d)
+            can.drawString(208, 464, from_d)
             #set to
             to_d = info.toDate
-            can.drawString(346, 426, to_d)
+            can.drawString(320, 464, to_d)
             #set day
-            can.drawString(423, 221, currentDay)
+            #can.drawString(380, 221, currentDay)
             #set month
-            can.drawString(472, 221, currentMonth)
-            #set carpentry
-            carpentry = "Ký tên"
-            can.drawString(400, 150, carpentry)
-            #save
-            can.showPage()
-            can.save()
-            print(can.drawText(t_message))
-            #move to the beginning of the StringIO buffer
-            packet.seek(0)
-            # create a new PDF with Reportlab
-            new_pdf = PdfFileReader(packet)
-            #create file
-            # read your existing PDF
-            formName = Type.objects.filter(id=info.formType_id).first().formName
-            existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
-            output = PdfFileWriter()
-            # add the "watermark" (which is the new pdf) on the existing page
-            page = existing_pdf.getPage(0)
-            page.mergePage(new_pdf.getPage(0))
-            output.addPage(page)
-            #output.addPage(new_pdf.getPage(0))
-            # finally, write "output" to a real file
-            outputFile = "uploads/"+ info.attachment
-            outputStream = open(outputFile , "wb")
-            try:
-                output.write(outputStream)
-                outputStream.close()
-                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now())
-            except:
-                HttpResponse('create PDF error')
+            #can.drawString(472, 221, currentMonth)
         else:
             #info student
             packet = io.BytesIO()
@@ -149,7 +120,7 @@ def createpdf():
             #20 is line width
             wraped_text = u"\n".join(textwrap.wrap(addr,35))
             t_message = can.beginText()
-            t_message.setTextOrigin(139,625)
+            t_message.setTextOrigin(139,627)
             t_message.textLines(wraped_text.encode('utf8'))
             can.drawText(t_message)
             #set date of birth
@@ -157,43 +128,45 @@ def createpdf():
             can.drawString(411, 644, dateOfBirth)
             #set gender
             gender = "Nữ" if(info.gender == 1) else "Nam"
-            can.drawString(383, 625, gender)
+            can.drawString(383, 627, gender)
             #set major
             major = info.major
             can.drawCentredString(300, 505, major)
             #set from
-            from_d = info.fromDate
-            can.drawString(100, 303, from_d)
+            #from_d = info.fromDate
+            #can.drawString(100, 303, from_d)
             #set to
-            to_d = info.toDate
-            can.drawString(210,303, to_d)
+            #to_d = info.toDate
+            #can.drawString(210,303, to_d)
             #save
-            can.showPage()
-            can.save()
-            print(can.drawText(t_message))
-            #move to the beginning of the StringIO buffer
-            packet.seek(0)
-            # create a new PDF with Reportlab
-            new_pdf = PdfFileReader(packet)
-            #create file
-            # read your existing PDF
-            formName = Type.objects.filter(id=info.formType_id).first().formName
-            existing_pdf = PdfFileReader(open("uploads/"+formName, "rb"))
-            output = PdfFileWriter()
-            # add the "watermark" (which is the new pdf) on the existing page
-            page = existing_pdf.getPage(0)
-            page.mergePage(new_pdf.getPage(0))
-            output.addPage(page)
-            #output.addPage(new_pdf.getPage(0))
-            # finally, write "output" to a real file
-            outputFile = "uploads/"+ info.attachment
-            outputStream = open(outputFile , "wb")
-            try:
-                output.write(outputStream)
-                outputStream.close()
-                Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now())
-            except:
-                HttpResponse('create PDF error')
+        can.showPage()
+        can.save()
+        #move to the beginning of the StringIO buffer
+        packet.seek(0)
+        # create a new PDF with Reportlab
+        new_pdf = PdfFileReader(packet)
+        #create file
+        # read your existing PDF
+        formName = Type.objects.filter(id=info.formType_id).first().formName
+        filename=os.path.join(absolutepath,'uploads/'+formName)
+        existing_pdf = PdfFileReader(open(filename, "rb"))
+        output = PdfFileWriter()
+        # add the "watermark" (which is the new pdf) on the existing page
+        page = existing_pdf.getPage(0)
+        page.mergePage(new_pdf.getPage(0))
+        output.addPage(page)
+        output.addPage(existing_pdf.getPage(1))
+        output.addPage(existing_pdf.getPage(2))
+        #output.addPage(new_pdf.getPage(0))
+        # finally, write "output" to a real file
+        outputFile = os.path.join(absolutepath,"uploads/"+ info.attachment)
+        outputStream = open(outputFile , "wb")
+        try:
+            output.write(outputStream)
+            outputStream.close()
+            Info.objects.filter(Identity=info.Identity).update(wpdf = 1,updated_at=datetime.now())
+        except:
+            HttpResponse('create PDF error')
 def updateSend(self):
     info = Info.objects.filter(sendmail=0).update(sendmail = 1,updated_at=datetime.now())
     return HttpResponseRedirect(reverse('boss:index')) 
@@ -207,7 +180,8 @@ def sendmail():
         email = to.email
         from_email = None
         msg = EmailMessage(subject, body, from_email, [email])
-        msg.attach_file('uploads/' + to.attachment)
+        filename=os.path.join(absolutepath,'uploads/'+to.attachment)
+        msg.attach_file(filename)
         #createpdf
         outputFile = "uploads/"+ to.attachment
         try:
