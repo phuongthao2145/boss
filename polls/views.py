@@ -43,6 +43,7 @@ absolutepath = os.path.dirname(os.path.dirname(__file__))
 def changeform(request,id):
     text="Cập nhật thành công"
     type = Type.objects.filter(id=id)
+    attachment = type.first().formName
     if request.method == 'POST':
         form = ChangeFormForm(request.POST, request.FILES)
         if form.is_valid():
@@ -51,10 +52,9 @@ def changeform(request,id):
             with open('uploads/' + f.name, 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            return render(request, 'boss/changeform.html', {'form': form,'id':id,'text':text})
+            return render(request, 'boss/changeform.html', {'form': form,'id':id,'text':text,'attachment':attachment})
     else:
         form = ChangeFormForm()
-    attachment = type.first().formName
     return render(request, 'boss/changeform.html', {'form': form,'id':id,'attachment':attachment})
 def changeform1(request):
     return changeform(request,1)
@@ -63,7 +63,7 @@ def changeform2(request):
 #https://www.pdffiller.com/en/functionality/coordinate-pdf.htm
 #https://stackoverflow.com/questions/1180115/add-text-to-existing-pdf-using-python
 def createpdf():
-    infos = Info.objects.order_by('id').reverse()[:10]
+    infos = Info.objects.filter(wpdf=0).order_by('id').reverse()[:10]
     for info in infos:
         if info.formType_id == 1:
              #info student
@@ -71,22 +71,22 @@ def createpdf():
             can = canvas.Canvas(packet, pagesize=letter)
             can.setFont("TNR", 12)
             name = u"%s" % info.fname + " " +"%s" % info.lname
-            can.drawString(113, 640, name)
+            can.drawString(113, 637, name)
             #set address
             addr = info.address
             #https://www.tutorialspoint.com/python-text-wrapping-and-filling
             #20 is line width
             wraped_text = u"\n".join(textwrap.wrap(addr,40))
             t_message = can.beginText()
-            t_message.setTextOrigin(113,621)
+            t_message.setTextOrigin(113,617)
             t_message.textLines(wraped_text.encode('utf8'))
             can.drawText(t_message)
             #set date of birth
             dateOfBirth =info.DateOfBirth
-            can.drawString(411, 640, dateOfBirth)
+            can.drawString(411, 637, dateOfBirth)
             #set gender
-            gender = "Nữ" if(info.gender == 1) else "Nam"
-            can.drawString(383, 621, gender)
+            gender = "Nữ" if(int(info.gender) == 1) else "Nam"
+            can.drawString(383, 617, gender)
             #set p_object
             #p_object = '2'
             #can.drawString(453, 601, p_object)
@@ -95,17 +95,19 @@ def createpdf():
             #can.drawString(442, 581, p_area)
             #set major
             major = info.major
-            can.drawCentredString(300, 505, major)
+            can.drawCentredString(300, 490, major)
             #set from
             from_d = info.fromDate
-            can.drawString(208, 464, from_d)
+            can.drawString(208, 440, from_d)
             #set to
             to_d = info.toDate
-            can.drawString(320, 464, to_d)
+            can.drawString(320, 440, to_d)
             #set day
-            #can.drawString(380, 221, currentDay)
+            signed_day = str(info.signed_at.day)
+            can.drawString(416, 232, signed_day)
             #set month
-            #can.drawString(472, 221, currentMonth)
+            signed_month = str(info.signed_at.month)
+            can.drawString(480, 232, signed_month)
         else:
             #info student
             packet = io.BytesIO()
@@ -113,25 +115,25 @@ def createpdf():
             can.setFont("TNR", 12)
             #set name
             name = u"%s" % info.fname + " " +"%s" % info.lname
-            can.drawString(140, 644, name)
+            can.drawString(140, 645, name)
             #set address
             addr = info.address
             #https://www.tutorialspoint.com/python-text-wrapping-and-filling
             #20 is line width
             wraped_text = u"\n".join(textwrap.wrap(addr,35))
             t_message = can.beginText()
-            t_message.setTextOrigin(139,627)
+            t_message.setTextOrigin(139,626)
             t_message.textLines(wraped_text.encode('utf8'))
             can.drawText(t_message)
             #set date of birth
             dateOfBirth =info.DateOfBirth
-            can.drawString(411, 644, dateOfBirth)
+            can.drawString(411, 645, dateOfBirth)
             #set gender
-            gender = "Nữ" if(info.gender == 1) else "Nam"
-            can.drawString(383, 627, gender)
+            gender = "Nữ" if(int(info.gender) == 1) else "Nam"
+            can.drawString(383, 626, gender)
             #set major
             major = info.major
-            can.drawCentredString(300, 505, major)
+            can.drawCentredString(300, 500, major)
             #set from
             #from_d = info.fromDate
             #can.drawString(100, 303, from_d)
@@ -174,6 +176,7 @@ def updateSend(self):
 
 def sendmail():
     info = Info.objects.filter(wpdf=1,status=0,sendmail=1).order_by('id').reverse()[:10]
+    print(info)
     for to in info:
         type = Type.objects.filter(id=to.formType_id).first()
         subject = "Trường Cao Đẳng Công Nghệ Thủ Đức - "+type.fullName+" Cao đẳng đợt "+str(to.period)+" năm " + currentYear
@@ -184,7 +187,6 @@ def sendmail():
         filename=os.path.join(absolutepath,'uploads/'+to.attachment)
         msg.attach_file(filename)
         #createpdf
-        outputFile = "uploads/"+ to.attachment
         try:
             #send mail
             msg.send()
@@ -192,6 +194,7 @@ def sendmail():
             to.refresh_from_db()
         except:
             HttpResponse('send mail error')
+            
 def page_not_found_view(request, exception):
     return render(request, '404.html', status=404)
 from django.http import FileResponse, Http404
@@ -254,32 +257,44 @@ def saveDB(sheet):
         if(count == 0):
             count += 1
             continue    
-        prefix = "GBNH" if col[13].value == 1 else "TBTT"
-        info = Info(majorID = col[0].value,
-            major = col[1].value,
-            fname = col[2].value,
-            lname = col[3].value,
-            gender = col[4].value,
+        prefix = "TBNH" if col[13].value == 1 else "TBTT"
+        phone1 = checkphone(int(col[8].value))
+        info = Info(majorID = int(col[0].value),
+            major = str(col[1].value),
+            fname = str(col[2].value),
+            lname = str(col[3].value),
+            gender = int(col[4].value),
             DateOfBirth = checkDate(col[5].value),
-            profileID = col[6].value,
-            Identity = col[7].value,
-            phone = col[8].value,
-            address = col[9].value,
-            email = col[10].value, 
+            profileID = str(col[6].value),
+            Identity = int(col[7].value),
+            phone = phone1,
+            address = str(col[9].value),
+            email = str(col[10].value), 
             fromDate = checkDate(col[11].value),
             toDate = checkDate(col[12].value),
-            attachment =  prefix+"-"+col[7].value + ".pdf",
-            formType_id = col[13].value,
-            period = col[14].value
+            attachment =  prefix+"-"+str(int(col[7].value)) + ".pdf",
+            formType_id = int(col[13].value),
+            period = int(col[14].value),
+            signed_at = checkDate(col[15].value),
             )
         try:
             info.save()
         except:
             return HttpResponse('save db fail!')
-        
+#checkphone
+def checkphone(phone):
+    phone = str(phone)
+    if phone[0] != 0:
+        return '0'+phone
+    else:
+        return phone       
 #sendmail()
 def student(request):
     if(request.method == 'GET'):
-        info = Info.objects.filter(phone=request.GET.get('keyword'),wpdf=1).first()
+        info = Info.objects.filter(phone=request.GET.get('keyword'),wpdf=1)
         return render(request,'boss/student.html',{'info':info})
     return render(request, 'boss/student.html')
+#updatewpdf
+def updatewpdf(request):
+    Info.objects.update(wpdf=0,updated_at=datetime.now())
+    return HttpResponseRedirect(reverse('boss:index')) 

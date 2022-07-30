@@ -33,6 +33,7 @@ class Info(models.Model):
     period = models.IntegerField(default=0)
     created_at=models.DateField(default=datetime.now, blank=True)
     updated_at=models.DateField(default=datetime.now, blank=True)
+    signed_at=models.DateField(max_length=200,null=True)
     def __str__(self):
         return self.profileID
 

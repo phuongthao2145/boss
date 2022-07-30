@@ -15,10 +15,10 @@ urlpatterns = [
     path('changeform2', views.changeform2, name='changeform2'),
     path('uploadfile', views.upload_file, name='uploadfile'),
     path('changeform1', views.changeform1, name='changeform1'),
-    
     re_path(r'^readfile/(?P<filename>.+)$', views.readfile, name='readfile'),
     path('updatesend',views.updateSend,name='updatesend'),
     path('createpdf',views.createpdf,name='createpdf'),
+    path('updatewpdf',views.updatewpdf,name='updatewpdf'),
     re_path(r'^viewpdf/(?P<attachment>.+)$', views.pdf_view, name='viewpdf'),
     path('',views.student,name='student')
 ]

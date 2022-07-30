@@ -30,19 +30,22 @@
         </tr>
     </thead>
     <tbody id="myTable">
+        {% for row in info %}  
         <tr>
-            <td>{{ info.major }}</td>
-            <td>{{ info.Identity }}</td>
-            <td>{{ info.fname }} {{ info.lname}}</td>
-            <td>{{ info.email }}</td>
-            <td><i class="fas fa-file-pdf text-secondary"></i> <a class="text-dark" href="{% url 'boss:viewpdf' info.attachment %}" target="_blank">{{ info.attachment}}</a> </td>
-            <td>{% if info.status == 1%}
-                Đã gửi 
+            <td>{{ row.major }}</td>
+            <td>{{ row.Identity }}</td>
+            <td>{{ row.fname }} {{row.lname}}</td>
+            <td>{{ row.phone }}</td>
+            <td>{{ row.email }}</td>
+            <td><i class="fas fa-file-pdf text-secondary"></i> 
+                {% if row.wpdf == 1%}
+                <a class="text-dark" href="{% url 'boss:viewpdf' row.attachment %}" target="_blank">{{ row.attachment}}</a> 
                 {% else %}
-                Chưa gửi
-                {%endif%}
+                - 
+                {% endif %}
             </td>
         </tr>
+        {%endfor%}
     </tbody>
 </table>
 </div>
