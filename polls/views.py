@@ -200,7 +200,7 @@ def page_not_found_view(request, exception):
 from django.http import FileResponse, Http404
 def pdf_view(request,attachment):
     try:
-        return FileResponse(open('uploads/'+attachment, 'rb'), content_type='application/pdf')
+        return FileResponse(open(os.path.join(absolutepath,'uploads/')+attachment, 'rb'), content_type='application/pdf')
     except FileNotFoundError:
         raise Http404()
 @login_required
